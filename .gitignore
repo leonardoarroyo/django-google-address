@@ -8,3 +8,4 @@ MANIFEST
 .coverage
 coverage.xml
 *.egg-info
+.idea/
