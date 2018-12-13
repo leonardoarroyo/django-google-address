@@ -80,8 +80,7 @@ class Address(models.Model):
 
     @property
     def city(self):
-        return self.address_components.get_queryset(). \
-            filter(types__id=1)
+        return str(self.address_components.filter(types__name='locality').first())
 
     @property
     def composite(self):
@@ -125,7 +124,7 @@ class Address(models.Model):
         :return: :type dict: address composed for BLP requirements and customization features
         """
         # Components types for address
-        address = {'route': '', 'sublocality_level_1': '', 'administrative_area_level_2': '',
+        address = {'route': '', 'locality': '', 'administrative_area_level_2': '',
                    'administrative_area_level_1': '', 'country': '', 'street_number': ''}
 
         # Fill address dict
@@ -141,8 +140,8 @@ class Address(models.Model):
             composed['street'] = address['route'][length]
         if 'route' in address and isinstance(address['street_number'], dict):
             composed['building_number'] = address['street_number'][length]
-        if 'sublocality_level_1' in address and isinstance(address['sublocality_level_1'], dict):
-            composed['city_name'] = address['sublocality_level_1'][length]
+        if 'locality' in address and isinstance(address['locality'], dict):
+            composed['city_name'] = address['locality'][length]
         if 'administrative_area_level_2' in address and isinstance(address['administrative_area_level_2'], dict):
             composed['region_name'] = address['administrative_area_level_2'][length]
         if 'administrative_area_level_1' in address and isinstance(address['administrative_area_level_1'], dict):
