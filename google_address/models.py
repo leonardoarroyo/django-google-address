@@ -53,6 +53,26 @@ class AddressComponent(models.Model):
         return component
 
 
+class AddressSets(models.QuerySet):
+    """ If you save city name from input to raw ->
+        you can use `unique_cities` queryset in model.Manager
+        like `Address.objects.unique_cities()`
+    """
+    def validated(self):
+        return self.filter(validated=True)
+
+    def unique_cities(self):
+        return self.distinct('raw').values('raw', 'id')
+
+
+class AddressManager(models.Manager):
+    def get_queryset(self):
+        return AddressSets(self.model, using=self._db)
+
+    def unique_cities(self):
+        return self.get_queryset().unique_cities().order_by('raw')
+
+
 class Address(models.Model):
     raw = models.CharField(max_length=400, blank=True, null=True)
     raw2 = models.CharField(max_length=400, blank=True, null=True)
@@ -61,6 +81,7 @@ class Address(models.Model):
     lat = models.FloatField('lat', blank=True, null=True)
     lng = models.FloatField('lng', blank=True, null=True)
     address_components = models.ManyToManyField(AddressComponent)
+    objects = AddressManager()
 
     def get_city_state(self):
         state = self.address_components.filter(types__name='administrative_area_level_1')
@@ -80,7 +101,8 @@ class Address(models.Model):
 
     @property
     def city(self):
-        return str(self.address_components.filter(types__name='locality').first())
+        city = self.address_components.filter(types__name='locality').first()
+        return str(city or '')
 
     @property
     def composite(self):
