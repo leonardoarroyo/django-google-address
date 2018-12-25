@@ -1,31 +1,32 @@
 from google_address import helpers
 import requests
 
-class GoogleAddressApi():
-  url = 'https://maps.googleapis.com/maps/api/geocode/json?address={address}'
-  key = None
 
-  def __init__(self):
-    # Set key
-    self.key = helpers.get_settings().get("API_KEY", None)
+class GoogleAddressApi:
+    url = 'https://maps.googleapis.com/maps/api/geocode/json?address={address}'
+    key = None
 
-    # Set language
-    self.language = helpers.get_settings().get("API_LANGUAGE", "en_US")
+    def __init__(self):
+        # Set key
+        self.key = helpers.get_settings().get("API_KEY", None)
 
-  def _get_url(self):
-    url = self.url
+        # Set language
+        self.language = helpers.get_settings().get("API_LANGUAGE", "en_US")
 
-    if self.key:
-      url = "{}&key={}".format(url, self.key)
+    def _get_url(self):
+        url = self.url
 
-    if self.language:
-      url = "{}&language={}".format(url, self.language)
+        if self.key:
+            url = "{}&key={}".format(url, self.key)
 
-    return url
+        if self.language:
+            url = "{}&language={}".format(url, self.language)
 
-  def query(self, raw):
-    url = self._get_url().format(address=raw)
+        return url
 
-    r = requests.get(url)
-    data = r.json()
-    return data
+    def query(self, raw):
+        url = self._get_url().format(address=raw)
+
+        r = requests.get(url)
+        data = r.json()
+        return data

@@ -3,33 +3,37 @@ import threading
 from google_address.api import GoogleAddressApi
 from google_address.models import Address, AddressComponent
 
+
 def update_address(instance):
-  response = GoogleAddressApi().query(instance.raw)
+    response = GoogleAddressApi().query(instance.raw)
 
-  if len(response["results"]) > 0:
-    result = response["results"][0]
-  else:
-    return False
+    if len(response["results"]) > 0:
+        result = response["results"][0]
+    else:
+        return False
 
-  instance.address_components.clear()
-  for api_component in result["address_components"]:
-    component = AddressComponent.get_or_create_component(api_component)
-    instance.address_components.add(component)
+    instance.address_components.clear()
+    for api_component in result["address_components"]:
+        component = AddressComponent.get_or_create_component(api_component)
+        instance.address_components.add(component)
 
-  try:
-    if result["geometry"]:
-      Address.objects.filter(pk=instance.pk).update(lat=result["geometry"]["location"]["lat"], lng=result["geometry"]["location"]["lng"])
-  except: #pragma: no cover
-    pass
+    try:
+        if result["geometry"]:
+            Address.objects.filter(pk=instance.pk).update(lat=result["geometry"]["location"]["lat"],
+                                                          lng=result["geometry"]["location"]["lng"])
+    except:  # pragma: no cover
+        pass
 
-  # Using update to avoid post_save signal
-  instance.address_line = instance.get_address()
-  Address.objects.filter(pk=instance.pk).update(address_line=instance.address_line, city_state=instance.get_city_state())
+    # Using update to avoid post_save signal
+    instance.address_line = instance.get_address()
+    Address.objects.filter(pk=instance.pk).update(address_line=instance.address_line,
+                                                  city_state=instance.get_city_state())
+
 
 class UpdateThread(threading.Thread):
-  def __init__(self, instance):
-    self.instance = instance
-    threading.Thread.__init__(self)
+    def __init__(self, instance):
+        self.instance = instance
+        threading.Thread.__init__(self)
 
-  def run (self):
-    return update_address(self.instance)
+    def run(self):
+        return update_address(self.instance)
