@@ -62,7 +62,7 @@ class AddressSets(models.QuerySet):
         return self.filter(validated=True)
 
     def unique_cities(self):
-        return self.distinct('raw').values('raw', 'id')
+        return self.distinct('city_state').values('city_state', 'id')
 
 
 class AddressManager(models.Manager):
@@ -70,7 +70,7 @@ class AddressManager(models.Manager):
         return AddressSets(self.model, using=self._db)
 
     def unique_cities(self):
-        return self.get_queryset().unique_cities().order_by('raw')
+        return self.get_queryset().unique_cities().order_by('city_state')
 
 
 class Address(models.Model):
@@ -157,7 +157,7 @@ class Address(models.Model):
                                                     'long_name': component.long_name}
 
         # Build address to dict or json
-        composed = {}
+        composed = {'street': '', 'building_number': '', 'city_name': '', 'region_name': '', 'district_name': ''}
         if 'route' in address and isinstance(address['route'], dict):
             composed['street'] = address['route'][length]
         if 'route' in address and isinstance(address['street_number'], dict):
