@@ -2,6 +2,10 @@
 Change log
 ===========
 
+v0.1.1
+-----------
+* Fix: No module named pip.req.
+
 v0.1.0
 -----------
 * First version. Unmodified code from django-ovp-core.
